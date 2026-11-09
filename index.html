@@ -48,9 +48,10 @@ footer{text-align:center;color:var(--muted);padding:10px;font-size:.9rem}
   <div class="track"><div class="bar" id="bar"></div></div>
   <form id="quizForm">
     <div id="questions"></div>
+    <p id="submitStatus" class="instructions hidden" role="status"></p>
     <div class="actions no-print">
       <button type="button" class="secondary" id="topBtn">Back to Student Info</button>
-      <button type="submit" class="primary">Submit Test</button>
+      <button type="submit" class="primary" id="submitBtn">Submit Test</button>
     </div>
   </form>
 </section>
@@ -72,39 +73,42 @@ footer{text-align:center;color:var(--muted);padding:10px;font-size:.9rem}
     <div id="reviewList"></div>
   </div>
 </section>
-<footer>Grade 7 ICT • Computer Number Systems • Summative Test</footer>
+<footer>Grade 7 ICT • Computer Number Systems • Summative Test<br><small>Online submission requires the teacher-configured Google Apps Script endpoint.</small></footer>
 </main>
+<iframe name="submitFrame" id="submitFrame" title="Submission response" style="display:none"></iframe>
+<form id="submitForm" method="post" target="submitFrame" style="display:none"><input type="hidden" id="payload" name="payload"></form>
 <script>
 const questions = [
-{q:"Which statement best describes a number system?",o:["A way to store pictures only","A way to represent numbers using symbols and a base","A type of computer keyboard","A program used to browse the internet"],a:1,e:"A number system represents numbers using a set of symbols (digits) and a base or radix."},
-{q:"What is the base of the decimal number system?",o:["2","8","10","16"],a:2,e:"The decimal number system is base 10."},
-{q:"Which set contains all the digits used in the binary number system?",o:["0 and 1","0 to 7","0 to 9","0 to 9 and A to F"],a:0,e:"Binary is base 2 and uses only the digits 0 and 1."},
-{q:"Which digits are allowed in the octal number system?",o:["0–1","0–7","0–9","1–8"],a:1,e:"Octal is base 8, so its digits run from 0 through 7."},
-{q:"Which symbols are used in hexadecimal?",o:["Only 0 and 1","0–7 only","0–9 and A–F","A–Z"],a:2,e:"Hexadecimal is base 16 and uses 0–9 and A–F."},
-{q:"Why is binary commonly used by computers?",o:["It has ten digits","It uses two digits, 0 and 1","It is always shorter than decimal","It uses letters A to F"],a:1,e:"Binary uses two states represented by 0 and 1, which suits digital computer circuits."},
-{q:"What is the decimal value of the binary number 10110₂?",o:["20","21","22","24"],a:2,e:"(1×16)+(0×8)+(1×4)+(1×2)+(0×1)=22."},
-{q:"Convert 110101₂ to decimal.",o:["51","52","53","55"],a:2,e:"32 + 16 + 0 + 4 + 0 + 1 = 53."},
-{q:"Convert 25₁₀ to binary.",o:["11001₂","10101₂","11100₂","10011₂"],a:0,e:"Repeated division by 2 gives remainders read from bottom to top: 11001."},
-{q:"Convert 42₁₀ to binary.",o:["101001₂","101010₂","110010₂","100110₂"],a:1,e:"Repeated division by 2 gives 101010."},
-{q:"When converting a decimal number to binary by repeated division, how should the remainders be read?",o:["Top to bottom","From left to right","Bottom to top","In numerical order"],a:2,e:"Read the remainders from bottom to top."},
-{q:"Convert 83₁₀ to octal.",o:["123₈","132₈","143₈","113₈"],a:0,e:"83 ÷ 8 gives remainders 3, 2, 1; read upward to get 123."},
-{q:"Convert 156₁₀ to octal.",o:["243₈","234₈","224₈","324₈"],a:1,e:"156 ÷ 8 = 19 remainder 4; 19 ÷ 8 = 2 remainder 3; 2 ÷ 8 = 0 remainder 2. Read upward: 234."},
-{q:"What is the decimal value of 247₈?",o:["157","167","177","187"],a:1,e:"(2×64)+(4×8)+(7×1)=128+32+7=167."},
-{q:"Convert 635₈ to decimal.",o:["403","413","423","433"],a:1,e:"(6×64)+(3×8)+(5×1)=384+24+5=413."},
-{q:"When converting octal to decimal, what place values are used from right to left?",o:["Powers of 2","Powers of 8","Powers of 10","Powers of 16"],a:1,e:"Octal place values are powers of 8: 8⁰, 8¹, 8², and so on."},
-{q:"How many binary digits should be grouped together when converting binary to octal?",o:["Groups of 2","Groups of 3","Groups of 4","Groups of 8"],a:1,e:"Group binary digits into sets of 3, starting from the right."},
-{q:"Convert 101101₂ to octal.",o:["45₈","54₈","55₈","65₈"],a:2,e:"101 | 101 becomes 5 | 5, so the answer is 55₈."},
-{q:"Convert 11001110₂ to octal.",o:["306₈","316₈","326₈","336₈"],a:1,e:"Pad on the left: 011 | 001 | 110. These groups are 3, 1, and 6."},
-{q:"When converting octal to binary, each octal digit is replaced by how many binary digits?",o:["1 bit","2 bits","3 bits","4 bits"],a:2,e:"Each octal digit is replaced by its 3-bit binary equivalent."},
-{q:"Convert 57₈ to binary.",o:["101111₂","111101₂","101110₂","110111₂"],a:0,e:"5 becomes 101 and 7 becomes 111; together: 101111."},
-{q:"Convert 326₈ to binary.",o:["011010110₂","110010110₂","011100110₂","010110110₂"],a:0,e:"3 → 011, 2 → 010, 6 → 110. Together: 011010110 (leading zero may be removed)."},
-{q:"In hexadecimal, what decimal value does the letter A represent?",o:["8","9","10","11"],a:2,e:"Hexadecimal symbols continue after 9: A=10, B=11, C=12, D=13, E=14, F=15."},
-{q:"What is the decimal value of 2F₁₆?",o:["45","46","47","48"],a:2,e:"2F₁₆ = (2×16) + 15 = 47₁₀."},
-{q:"Why is hexadecimal useful in computing?",o:["It uses only two symbols","It represents four binary bits in one hexadecimal digit","It replaces all computer programs","It has no place values"],a:1,e:"One hexadecimal digit represents four binary bits, making long binary values more compact."}
+{q:"Which statement best describes a number system?",o:["A way to store pictures only","A way to represent numbers using symbols and a base","A type of computer keyboard","A program used to browse the internet"]},
+{q:"What is the base of the decimal number system?",o:["2","8","10","16"]},
+{q:"Which set contains all the digits used in the binary number system?",o:["0 and 1","0 to 7","0 to 9","0 to 9 and A to F"]},
+{q:"Which digits are allowed in the octal number system?",o:["0–1","0–7","0–9","1–8"]},
+{q:"Which symbols are used in hexadecimal?",o:["Only 0 and 1","0–7 only","0–9 and A–F","A–Z"]},
+{q:"Why is binary commonly used by computers?",o:["It has ten digits","It uses two digits, 0 and 1","It is always shorter than decimal","It uses letters A to F"]},
+{q:"What is the decimal value of the binary number 10110₂?",o:["20","21","22","24"]},
+{q:"Convert 110101₂ to decimal.",o:["51","52","53","55"]},
+{q:"Convert 25₁₀ to binary.",o:["11001₂","10101₂","11100₂","10011₂"]},
+{q:"Convert 42₁₀ to binary.",o:["101001₂","101010₂","110010₂","100110₂"]},
+{q:"When converting a decimal number to binary by repeated division, how should the remainders be read?",o:["Top to bottom","From left to right","Bottom to top","In numerical order"]},
+{q:"Convert 83₁₀ to octal.",o:["123₈","132₈","143₈","113₈"]},
+{q:"Convert 156₁₀ to octal.",o:["243₈","234₈","224₈","324₈"]},
+{q:"What is the decimal value of 247₈?",o:["157","167","177","187"]},
+{q:"Convert 635₈ to decimal.",o:["403","413","423","433"]},
+{q:"When converting octal to decimal, what place values are used from right to left?",o:["Powers of 2","Powers of 8","Powers of 10","Powers of 16"]},
+{q:"How many binary digits should be grouped together when converting binary to octal?",o:["Groups of 2","Groups of 3","Groups of 4","Groups of 8"]},
+{q:"Convert 101101₂ to octal.",o:["45₈","54₈","55₈","65₈"]},
+{q:"Convert 11001110₂ to octal.",o:["306₈","316₈","326₈","336₈"]},
+{q:"When converting octal to binary, each octal digit is replaced by how many binary digits?",o:["1 bit","2 bits","3 bits","4 bits"]},
+{q:"Convert 57₈ to binary.",o:["101111₂","111101₂","101110₂","110111₂"]},
+{q:"Convert 326₈ to binary.",o:["011010110₂","110010110₂","011100110₂","010110110₂"]},
+{q:"In hexadecimal, what decimal value does the letter A represent?",o:["8","9","10","11"]},
+{q:"What is the decimal value of 2F₁₆?",o:["45","46","47","48"]},
+{q:"Why is hexadecimal useful in computing?",o:["It uses only two symbols","It represents four binary bits in one hexadecimal digit","It replaces all computer programs","It has no place values"]}
 ];
 const letters=["A","B","C","D"];
 const $=id=>document.getElementById(id);
-let submitted=false, lastReport="";
+const API_URL="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+let submitted=false, lastReport="", requestId="";
 function renderQuestions(){
   $("questions").innerHTML=questions.map((q,i)=>`<article class="question" id="q${i}">
     <div class="qhead"><span class="qnum">${i+1}</span><div class="qtext">${q.q}</div></div>
@@ -116,8 +120,15 @@ function updateProgress(){
   const n=questions.filter((q,i)=>document.querySelector(`input[name="q${i}"]:checked`)).length;
   $("answered").textContent=`${n} of 25 answered`; $("percent").textContent=`${Math.round(n/25*100)}%`; $("bar").style.width=(n/25*100)+"%";
 }
+function showError(message){
+  $("submitStatus").textContent=message;
+  $("submitStatus").classList.remove("hidden");
+  $("submitBtn").disabled=false;
+  $("submitBtn").textContent="Try Submit Again";
+}
 $("startBtn").addEventListener("click",()=>{
   if(!$("studentName").value.trim()){alert("Please enter the student's full name before starting.");$("studentName").focus();return;}
+  if(!API_URL.startsWith("https://script.google.com/macros/s/")){alert("The teacher must configure the Apps Script Web App URL in index.html before students can submit.");return;}
   $("intro").classList.add("hidden");$("quiz").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
 });
 $("topBtn").addEventListener("click",()=>{ $("quiz").classList.add("hidden");$("intro").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});});
@@ -125,27 +136,38 @@ $("quizForm").addEventListener("submit",ev=>{
   ev.preventDefault(); if(submitted)return;
   const missing=questions.findIndex((q,i)=>!document.querySelector(`input[name="q${i}"]:checked`));
   if(missing!==-1){alert(`Please answer all questions. Question ${missing+1} is unanswered.`);$("q"+missing).scrollIntoView({behavior:"smooth"});return;}
-  const name=$("studentName").value.trim(), section=$("studentSection").value.trim()||"Not specified";
+  const name=$("studentName").value.trim(), section=$("studentSection").value.trim()||"Grade 7 – Section A";
   const answers=questions.map((q,i)=>Number(document.querySelector(`input[name="q${i}"]:checked`).value));
-  const score=answers.reduce((s,v,i)=>s+(v===questions[i].a?1:0),0);
-  const date=new Date().toLocaleString();
-  const percent=Math.round(score/25*100);
-  const remark=percent>=90?"Outstanding":percent>=85?"Very Satisfactory":percent>=80?"Satisfactory":percent>=75?"Fairly Satisfactory":"Needs Improvement";
+  requestId=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+  const payload={requestId,name,section,answers};
+  $("submitBtn").disabled=true;$("submitBtn").textContent="Submitting…";
+  $("submitStatus").textContent="Sending your answers securely. Please keep this page open.";
+  $("submitStatus").classList.remove("hidden");
+  $("payload").value=JSON.stringify(payload);
+  $("submitFrame").dataset.waiting="yes";
+  $("submitForm").action=API_URL;
+  $("submitForm").submit();
+  window.submitTimeout=setTimeout(()=>{if(!submitted)showError("No confirmation received yet. Check your internet connection and try again. If a submission may already have gone through, ask your teacher before retrying.");},45000);
+});
+window.addEventListener("message",event=>{
+  const d=event.data;
+  if(!d||d.type!=="ICT_TEST_RESULT"||d.requestId!==requestId)return;
+  clearTimeout(window.submitTimeout);
+  if(!d.ok){
+    if(d.duplicate){showError("A submission has already been recorded for this learner name and section. Please contact your teacher if this is an error.");$("submitBtn").disabled=true;$("submitBtn").textContent="Already Submitted";}
+    else showError(d.message||"Submission could not be saved. Please contact your teacher.");
+    return;
+  }
+  submitted=true;
+  const name=$("studentName").value.trim(), section=$("studentSection").value.trim()||"Grade 7 – Section A";
+  const score=d.score, percent=d.percent, remark=d.remark, date=d.submittedAt;
   $("resultName").textContent=`Student: ${name}  |  Section: ${section}`;
   $("score").textContent=`${score} / 25 (${percent}%)`; $("status").textContent=remark;
-  $("resultDetails").textContent=`Submitted: ${date} • Correct: ${score} • Incorrect: ${25-score}`;
-  $("reviewList").innerHTML=questions.map((q,i)=>{
-    const ok=answers[i]===q.a;
-    return `<div class="review-item ${ok?"correct":"incorrect"}"><strong>${i+1}. ${q.q}</strong><br>Your answer: ${letters[answers[i]]}. ${q.o[answers[i]]}<br>Correct answer: ${letters[q.a]}. ${q.o[q.a]}<div class="explain">${q.e}</div></div>`;
-  }).join("");
-  const lines=[
-    "GRADE 7 ICT – SECTION A","COMPUTER NUMBER SYSTEMS SUMMATIVE TEST",
-    "Student Name: "+name,"Class/Section: "+section,"Date Submitted: "+date,
-    "Score: "+score+" / 25","Percentage: "+percent+"%","Performance: "+remark,"",
-    "INDIVIDUAL ANSWER RECORD",
-    ...questions.map((q,i)=>`${i+1}. ${q.q}\n   Student answer: ${letters[answers[i]]}. ${q.o[answers[i]]}\n   Correct answer: ${letters[q.a]}. ${q.o[q.a]}\n   Result: ${answers[i]===q.a?"CORRECT":"INCORRECT"}\n   Explanation: ${q.e}`)
-  ];
-  lastReport=lines.join("\n"); submitted=true;
+  $("resultDetails").textContent=`Submitted: ${date} • Correct: ${score} • Incorrect: ${25-score} • Saved to teacher's records`;
+  $("reviewList").innerHTML=d.review.map((r,i)=>`<div class="review-item ${r.correct?"correct":"incorrect"}"><strong>${i+1}. ${questions[i].q}</strong><br>Your answer: ${letters[r.studentAnswer]}. ${questions[i].o[r.studentAnswer]}<br>Correct answer: ${letters[r.correctAnswer]}. ${questions[i].o[r.correctAnswer]}<div class="explain">${r.explanation}</div></div>`).join("");
+  const lines=["GRADE 7 ICT – SECTION A","COMPUTER NUMBER SYSTEMS SUMMATIVE TEST","Student Name: "+name,"Class/Section: "+section,"Date Submitted: "+date,"Score: "+score+" / 25","Percentage: "+percent+"%","Performance: "+remark,"","INDIVIDUAL ANSWER RECORD",
+    ...d.review.map((r,i)=>`${i+1}. ${questions[i].q}\n   Student answer: ${letters[r.studentAnswer]}. ${questions[i].o[r.studentAnswer]}\n   Correct answer: ${letters[r.correctAnswer]}. ${questions[i].o[r.correctAnswer]}\n   Result: ${r.correct?"CORRECT":"INCORRECT"}\n   Explanation: ${r.explanation}`)];
+  lastReport=lines.join("\n");
   $("quiz").classList.add("hidden");$("result").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
 });
 $("downloadBtn").addEventListener("click",()=>{
