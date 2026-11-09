@@ -107,7 +107,7 @@ const questions = [
 ];
 const letters=["A","B","C","D"];
 const $=id=>document.getElementById(id);
-const API_URL="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const API_URL="https://script.google.com/macros/s/AKfycbwJN3yIajJfrQPFlUNied9R5KbMa7_Yp55KNgDMnv3dRQrrx9kb-AZxTdLxI31rWiE7Wg/exec";
 let submitted=false, lastReport="", requestId="";
 function renderQuestions(){
   $("questions").innerHTML=questions.map((q,i)=>`<article class="question" id="q${i}">
